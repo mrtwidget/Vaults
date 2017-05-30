@@ -77,6 +77,42 @@ namespace NEXIS.Vaults
             return MySQLConnection;
         }
 
+        public void ListVaults(UnturnedPlayer player)
+        {
+            try
+            {
+                MySqlConnection MySQLConnection = CreateConnection();
+                MySqlCommand MySQLCommand = MySQLConnection.CreateCommand();
+                MySQLConnection.Open();
+
+                MySQLCommand.CommandText = "SELECT COUNT(*) FROM " + Vault.Instance.Configuration.Instance.DatabaseTable + " WHERE steam_id = '" + player.CSteamID.ToString() + "'";
+                int vaultCount = Convert.ToInt32(MySQLCommand.ExecuteScalar());
+
+                MySQLCommand.CommandText = "SELECT * FROM " + Vault.Instance.Configuration.Instance.DatabaseTable + " WHERE steam_id = '" + player.CSteamID.ToString() + "'";
+                MySqlDataReader vaults = MySQLCommand.ExecuteReader();
+
+                UnturnedChat.Say(player, "Vaults Available: " + vaultCount + " / " + Vault.Instance.Configuration.Instance.TotalAllowedVaults, Color.white);
+
+                while (vaults.Read())
+                {
+                    if (vaultCount > 0)
+                    {
+                        UnturnedChat.Say(player, "Vault: " + vaults["inventory"], Color.white);                        
+                    }
+                    else
+                    {
+                        UnturnedChat.Say(player, Vault.Instance.Translations.Instance.Translate("vault_saved_noitems"), Color.white);
+                    }
+                }
+                vaults.Close();
+                MySQLConnection.Close();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(ex);
+            }
+        }
+
         /**
          * SAVE PLAYER INVENTORY ITEM(S)
          * 
@@ -109,20 +145,30 @@ namespace NEXIS.Vaults
 
                         try
                         {
-                            for (byte page = 0; page < 8; page++)
+                            player.Player.equipment.dequip();
+
+                            foreach (var i in player.Inventory.items)
                             {
-                                var count = player.Inventory.getItemCount(page);
-
-                                for (byte index = 0; index < count; index++)
+                                if (i == null) continue;
+                                for (byte w = 0; w < i.width; w++)
                                 {
-                                    // add item found to list
-                                    ItemJar invItem = player.Inventory.getItem(page, index);
-                                    InventoryItemsFound.Add(invItem.item.id.ToString());
+                                    for (byte h = 0; h < i.height; h++)
+                                    {
+                                        try
+                                        {
+                                            byte index = i.getIndex(w, h);
+                                            if (index == 255) continue;
+                                            // add item found to list
+                                            ItemJar invItem = player.Inventory.getItem(i.page, index);
+                                            InventoryItemsFound.Add(invItem.item.id.ToString());
+                                        }
+                                        catch { }
+                                    }
                                 }
-
-                                // create mysql string from array items separated by commas
-                                InventoryDatabaseString = string.Join(",", InventoryItemsFound.ToArray());
                             }
+
+                            // create mysql string from array items separated by commas
+                            InventoryDatabaseString = string.Join(",", InventoryItemsFound.ToArray());
 
                             if (InventoryItemsFound.Capacity > 0)
                             {
@@ -314,16 +360,24 @@ namespace NEXIS.Vaults
          *  @param UnturnedPlayer player Player data
          */
         public void ClearInventory(UnturnedPlayer player)
-        {
+        {            
             try
             {
-                for (byte page = 0; page < 8; page++)
+                foreach (var i in player.Inventory.items)
                 {
-                    var count = player.Inventory.getItemCount(page);
-
-                    for (byte index = 0; index < count; index++)
+                    if (i == null) continue;
+                    for (byte w = 0; w < i.width; w++)
                     {
-                        player.Inventory.removeItem(page, index);
+                        for (byte h = 0; h < i.height; h++)
+                        {
+                            try
+                            {
+                                byte index = i.getIndex(w, h);
+                                if (index == 255) continue;
+                                i.removeItem(index);
+                            }
+                            catch { }
+                        }
                     }
                 }
             }
@@ -332,6 +386,5 @@ namespace NEXIS.Vaults
                 Logger.LogException(ex);
             }
         }
-
     }
 }

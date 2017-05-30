@@ -51,6 +51,7 @@ namespace NEXIS.Vaults
                     {"vault_saved_noitems", "You don't have any items to save!"},
                     {"vault_full", "All of your Vaults are already full! Free up some space and try again."},
                     {"vault_empty", "No Vault exists for you to open! You must save some items first."},
+                    {"vaults_invalid_action", "Invalid action! Type \"/vaults help\" for more information."}
                 };
             }
         }

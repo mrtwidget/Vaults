@@ -29,7 +29,7 @@ namespace NEXIS.Vaults
             TotalAllowedVaults = 10;
 
             // Debug Mode
-            Debug = true;
+            Debug = false;
             
             // Database Settings
             DatabaseHost = "localhost";

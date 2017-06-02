@@ -26,7 +26,7 @@ namespace NEXIS.Vaults
             VaultsSaveEntireInventory = true;
             DeleteInventoryItemsOnSave = true;
             DeleteDatabaseVaultOnOpen = true;
-            TotalAllowedVaults = 10;
+            TotalAllowedVaults = 3;
 
             // Debug Mode
             Debug = false;

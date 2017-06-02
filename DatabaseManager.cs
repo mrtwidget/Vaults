@@ -129,8 +129,6 @@ namespace NEXIS.Vaults
                 MySqlCommand MySQLCommand = MySQLConnection.CreateCommand();
                 MySQLConnection.Open();
 
-                /**
-                * SAVE ENTIRE INVENTORY */
                 if (Vault.Instance.Configuration.Instance.VaultsSaveEntireInventory)
                 {
                     // check if player vault already exists
@@ -143,10 +141,19 @@ namespace NEXIS.Vaults
                         List<string> InventoryItemsFound = new List<string>();
                         string InventoryDatabaseString = "";
 
+                        // save and remove items
                         try
                         {
-                            player.Player.equipment.dequip();
+                            // get clothing
+                            InventoryItemsFound.Add(player.Player.clothing.shirt.ToString());
+                            InventoryItemsFound.Add(player.Player.clothing.pants.ToString());
+                            InventoryItemsFound.Add(player.Player.clothing.mask.ToString());
+                            InventoryItemsFound.Add(player.Player.clothing.hat.ToString());
+                            InventoryItemsFound.Add(player.Player.clothing.glasses.ToString());
+                            InventoryItemsFound.Add(player.Player.clothing.vest.ToString());
+                            InventoryItemsFound.Add(player.Player.clothing.backpack.ToString());
 
+                            // get items
                             foreach (var i in player.Inventory.items)
                             {
                                 if (i == null) continue;
@@ -209,7 +216,7 @@ namespace NEXIS.Vaults
                 }
                 else
                 /**
-                * SAVE INDIVIDUAL ITEM */
+                 * SAVE INDIVIDUAL ITEM */
                 {
                     // check if item to vault exists in player inventory
                     if (player.Inventory.has(itemId) != null)
@@ -363,6 +370,8 @@ namespace NEXIS.Vaults
         {            
             try
             {
+                player.Player.equipment.dequip();
+
                 foreach (var i in player.Inventory.items)
                 {
                     if (i == null) continue;
@@ -379,6 +388,49 @@ namespace NEXIS.Vaults
                             catch { }
                         }
                     }
+                }
+                                
+                // glasses
+                player.Player.clothing.askWearGlasses(0, 0, new byte[0], true);
+                for (byte p2 = 0; p2 < player.Player.inventory.getItemCount(2); p2++)
+                {
+                    player.Player.inventory.removeItem(2, 0);
+                }
+                // hat
+                player.Player.clothing.askWearHat(0, 0, new byte[0], true);
+                for (byte p2 = 0; p2 < player.Player.inventory.getItemCount(2); p2++)
+                {
+                    player.Player.inventory.removeItem(2, 0);
+                }
+                // mask
+                player.Player.clothing.askWearMask(0, 0, new byte[0], true);
+                for (byte p2 = 0; p2 < player.Player.inventory.getItemCount(2); p2++)
+                {
+                    player.Player.inventory.removeItem(2, 0);
+                }
+                // pants
+                player.Player.clothing.askWearPants(0, 0, new byte[0], true);
+                for (byte p2 = 0; p2 < player.Player.inventory.getItemCount(2); p2++)
+                {
+                    player.Player.inventory.removeItem(2, 0);
+                }
+                // shirt
+                player.Player.clothing.askWearShirt(0, 0, new byte[0], true);
+                for (byte p2 = 0; p2 < player.Player.inventory.getItemCount(2); p2++)
+                {
+                    player.Player.inventory.removeItem(2, 0);
+                }
+                // vest
+                player.Player.clothing.askWearVest(0, 0, new byte[0], true);
+                for (byte p2 = 0; p2 < player.Player.inventory.getItemCount(2); p2++)
+                {
+                    player.Player.inventory.removeItem(2, 0);
+                }
+                // backpack
+                player.Player.clothing.askWearBackpack(0, 0, new byte[0], true);
+                for (byte p2 = 0; p2 < player.Player.inventory.getItemCount(2); p2++)
+                {
+                    player.Player.inventory.removeItem(2, 0);
                 }
             }
             catch (Exception ex)

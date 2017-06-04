@@ -1,13 +1,13 @@
-# Vaults
+# Simple Vaults
 
 *Allows players to save and retrieve their entire inventory - or individual items - to a server-side MySQL database.*
 
 This plugin was developed using [Rocket Mod](https://rocketmod.net/) libraries for the [Steam](http://store.steampowered.com/) game [Unturned](http://store.steampowered.com/app/304930/).
 
-![picture alt](http://nexisrealms.com/images/hosted/vaults.jpg "Vaults v1.0 Logo")
+![picture alt](http://nexisrealms.com/images/hosted/vaults.jpg "Simple Vaults v1.0 Logo")
 
 **Current Release :**
-- Vaults v1.0
+- Simple Vaults v1.0.0.3
 
 **How to Install:**
 

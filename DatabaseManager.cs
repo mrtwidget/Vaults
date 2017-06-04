@@ -38,6 +38,7 @@ namespace NEXIS.Vaults
                     "(id INT(8) NOT NULL AUTO_INCREMENT," +
                     "steam_id VARCHAR(50) NOT NULL," +
                     "inventory TEXT NULL," +
+                    "server_id VARCHAR(255) NOT NULL," +
                     "timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP," +
                     "PRIMARY KEY(id));";
 
@@ -85,13 +86,21 @@ namespace NEXIS.Vaults
                 MySqlCommand MySQLCommand = MySQLConnection.CreateCommand();
                 MySQLConnection.Open();
 
-                MySQLCommand.CommandText = "SELECT COUNT(*) FROM " + Vault.Instance.Configuration.Instance.DatabaseTable + " WHERE steam_id = '" + player.CSteamID.ToString() + "'";
+                string server_id_sel = "";
+
+                // check if player vault already exists
+                if (!Vault.Instance.Configuration.Instance.ShareVaultsAcrossServers)
+                {
+                    server_id_sel = " AND server_id = '" + Provider.serverID + "'";
+                }
+
+                MySQLCommand.CommandText = "SELECT COUNT(*) FROM " + Vault.Instance.Configuration.Instance.DatabaseTable + " WHERE steam_id = '" + player.CSteamID.ToString() + "'" + server_id_sel;
                 int vaultCount = Convert.ToInt32(MySQLCommand.ExecuteScalar());
 
-                MySQLCommand.CommandText = "SELECT * FROM " + Vault.Instance.Configuration.Instance.DatabaseTable + " WHERE steam_id = '" + player.CSteamID.ToString() + "'";
+                MySQLCommand.CommandText = "SELECT * FROM " + Vault.Instance.Configuration.Instance.DatabaseTable + " WHERE steam_id = '" + player.CSteamID.ToString() + "'" + server_id_sel;
                 MySqlDataReader vaults = MySQLCommand.ExecuteReader();
 
-                UnturnedChat.Say(player, "Vaults Available: " + vaultCount + " / " + Vault.Instance.Configuration.Instance.TotalAllowedVaults, Color.white);
+                UnturnedChat.Say(player, "Vaults Used: " + vaultCount + " / " + Vault.Instance.Configuration.Instance.TotalAllowedVaults, Color.white);
 
                 while (vaults.Read())
                 {
@@ -131,8 +140,15 @@ namespace NEXIS.Vaults
 
                 if (Vault.Instance.Configuration.Instance.VaultsSaveEntireInventory)
                 {
+                    string server_id_sel = "";
+
                     // check if player vault already exists
-                    MySQLCommand.CommandText = "SELECT * FROM " + Vault.Instance.Configuration.Instance.DatabaseTable + " WHERE steam_id = '" + player.CSteamID.ToString() + "'";
+                    if (!Vault.Instance.Configuration.Instance.ShareVaultsAcrossServers)
+                    {
+                        server_id_sel = " AND server_id = '" + Provider.serverID + "'";
+                    }
+ 
+                    MySQLCommand.CommandText = "SELECT * FROM " + Vault.Instance.Configuration.Instance.DatabaseTable + " WHERE steam_id = '" + player.CSteamID.ToString() + "'" + server_id_sel;
                     object vaultExists = MySQLCommand.ExecuteScalar();
 
                     // check if vault already exists
@@ -179,8 +195,8 @@ namespace NEXIS.Vaults
 
                             if (InventoryItemsFound.Capacity > 0)
                             {
-                                // update database
-                                MySQLCommand.CommandText = "INSERT INTO " + Vault.Instance.Configuration.Instance.DatabaseTable + " (steam_id,inventory) VALUES ('" + player.CSteamID.ToString() + "','" + InventoryDatabaseString + "')";
+                                // add vault to database
+                                MySQLCommand.CommandText = "INSERT INTO " + Vault.Instance.Configuration.Instance.DatabaseTable + " (steam_id,inventory,server_id) VALUES ('" + player.CSteamID.ToString() + "','" + InventoryDatabaseString + "','" + (!Vault.Instance.Configuration.Instance.ShareVaultsAcrossServers ? Provider.serverID : "") + "')";
                                 MySQLCommand.ExecuteNonQuery();
 
                                 // delete all player inventory items, in enabled in configuration
@@ -221,8 +237,16 @@ namespace NEXIS.Vaults
                     // check if item to vault exists in player inventory
                     if (player.Inventory.has(itemId) != null)
                     {
+                        string server_id_sel = "";
+
+                        // check if player vault already exists
+                        if (!Vault.Instance.Configuration.Instance.ShareVaultsAcrossServers)
+                        {
+                            server_id_sel = " AND server_id = '" + Provider.serverID + "'";
+                        }
+
                         // check available vaults
-                        MySQLCommand.CommandText = "SELECT COUNT(*) FROM " + Vault.Instance.Configuration.Instance.DatabaseTable + " WHERE steam_id = '" + player.CSteamID.ToString() + "'";
+                        MySQLCommand.CommandText = "SELECT COUNT(*) FROM " + Vault.Instance.Configuration.Instance.DatabaseTable + " WHERE steam_id = '" + player.CSteamID.ToString() + "'" + server_id_sel;
                         int vaultCount = Convert.ToInt32(MySQLCommand.ExecuteScalar());
 
                         // check if player has used all available vaults
@@ -234,8 +258,7 @@ namespace NEXIS.Vaults
                         else
                         {
                             // vault available; save the item 
-                            // remove item from player inventory
-                            MySQLCommand.CommandText = "INSERT INTO " + Vault.Instance.Configuration.Instance.DatabaseTable + " (steam_id,inventory) VALUES ('" + player.CSteamID.ToString() + "','" + itemId.ToString() + "')";
+                            MySQLCommand.CommandText = "INSERT INTO " + Vault.Instance.Configuration.Instance.DatabaseTable + " (steam_id,inventory,server_id) VALUES ('" + player.CSteamID.ToString() + "','" + itemId.ToString() + "','" + (!Vault.Instance.Configuration.Instance.ShareVaultsAcrossServers ? Provider.serverID : "") + "')";
                             MySQLCommand.ExecuteNonQuery();
 
                             // remove item from player inventory, if enabled in configuration
@@ -280,13 +303,21 @@ namespace NEXIS.Vaults
                 MySqlCommand MySQLCommand = MySQLConnection.CreateCommand();
                 MySQLConnection.Open();
 
-                MySQLCommand.CommandText = "SELECT steam_id FROM " + Vault.Instance.Configuration.Instance.DatabaseTable + " WHERE steam_id = '" + player.CSteamID.ToString() + "'";
+                string server_id_sel = "";
+
+                // check if player vault already exists
+                if (!Vault.Instance.Configuration.Instance.ShareVaultsAcrossServers)
+                {
+                    server_id_sel = " AND server_id = '" + Provider.serverID + "'";
+                }
+
+                MySQLCommand.CommandText = "SELECT steam_id FROM " + Vault.Instance.Configuration.Instance.DatabaseTable + " WHERE steam_id = '" + player.CSteamID.ToString() + "'" + server_id_sel;
                 object result = MySQLCommand.ExecuteScalar();                
 
                 if (result != null)
                 {
                     // query player vault inventory items
-                    MySQLCommand.CommandText = "SELECT inventory FROM " + Vault.Instance.Configuration.Instance.DatabaseTable + " WHERE steam_id = '" + player.CSteamID.ToString() + "'";
+                    MySQLCommand.CommandText = "SELECT inventory FROM " + Vault.Instance.Configuration.Instance.DatabaseTable + " WHERE steam_id = '" + player.CSteamID.ToString() + "'" + server_id_sel;
                     MySqlDataReader inventory = MySQLCommand.ExecuteReader();
 
                     if (inventory.Read())
@@ -305,7 +336,7 @@ namespace NEXIS.Vaults
                     // delete vault from database, if enabled in configuration
                     if (Vault.Instance.Configuration.Instance.DeleteDatabaseVaultOnOpen)
                     {
-                        MySQLCommand.CommandText = "DELETE FROM " + Vault.Instance.Configuration.Instance.DatabaseTable + " WHERE steam_id = '" + player.CSteamID.ToString() + "'";
+                        MySQLCommand.CommandText = "DELETE FROM " + Vault.Instance.Configuration.Instance.DatabaseTable + " WHERE steam_id = '" + player.CSteamID.ToString() + "'" + (!Vault.Instance.Configuration.Instance.ShareVaultsAcrossServers ? " AND server_id = '" + Provider.serverID + "'" : "");
                         MySQLCommand.ExecuteNonQuery();
                     }
 

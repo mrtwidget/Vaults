@@ -9,6 +9,7 @@ namespace NEXIS.Vaults
         public bool DeleteInventoryItemsOnSave;
         public bool DeleteDatabaseVaultOnOpen;
         public int TotalAllowedVaults;
+        public bool ShareVaultsAcrossServers;
 
         public bool Debug;
 
@@ -27,6 +28,7 @@ namespace NEXIS.Vaults
             DeleteInventoryItemsOnSave = true;
             DeleteDatabaseVaultOnOpen = true;
             TotalAllowedVaults = 3;
+            ShareVaultsAcrossServers = false;
 
             // Debug Mode
             Debug = false;

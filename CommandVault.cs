@@ -25,7 +25,7 @@ namespace NEXIS.Vaults
 
         public string Help
         {
-            get { return "Save items from your inventory to your own personal Vault."; }
+            get { return "Save and load items from your inventory to your own personal Vault."; }
         }
 
         public List<string> Aliases
@@ -35,7 +35,7 @@ namespace NEXIS.Vaults
 
         public string Syntax
         {
-            get { return "/vault {save|load|help} [item...]"; }
+            get { return "/vault <save|load|delete|help> <itemId>"; }
         }
 
         public List<string> Permissions
@@ -66,6 +66,10 @@ namespace NEXIS.Vaults
                             case "load":
                                 // open player vault from database
                                 Vault.Instance.Database.OpenPlayerInventory(player);
+                                break;
+                            case "delete":
+                                // open player vault from database
+                                Vault.Instance.Database.DeletePlayerVault(player);
                                 break;
                             case "help":
                                 UnturnedChat.Say(caller, Help, Color.white);

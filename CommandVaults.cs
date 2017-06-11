@@ -1,5 +1,4 @@
-﻿using System;
-using Rocket.API;
+﻿using Rocket.API;
 using Rocket.Unturned.Chat;
 using Rocket.Unturned.Player;
 using System.Collections.Generic;
@@ -25,7 +24,7 @@ namespace NEXIS.Vaults
 
         public string Help
         {
-            get { return "View current Vault items."; }
+            get { return "View your current Vault items."; }
         }
 
         public List<string> Aliases
@@ -35,7 +34,7 @@ namespace NEXIS.Vaults
 
         public string Syntax
         {
-            get { return "/vaults [help]"; }
+            get { return "/vaults <help>"; }
         }
 
         public List<string> Permissions

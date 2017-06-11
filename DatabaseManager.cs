@@ -1,13 +1,10 @@
 ﻿using Logger = Rocket.Core.Logging.Logger;
 using Rocket.Unturned.Player;
 using Rocket.Unturned.Chat;
-using Rocket.Unturned.Skills;
 using SDG.Unturned;
 using MySql.Data.MySqlClient;
 using System.Collections.Generic;
-using Steamworks;
 using UnityEngine;
-using System.Linq;
 using System;
 
 namespace NEXIS.Vaults
@@ -78,6 +75,12 @@ namespace NEXIS.Vaults
             return MySQLConnection;
         }
 
+        /**
+         * LIST PLAYER VAULTS
+         * 
+         * This function lists all player Vaults by returning a chat message
+         * @param UnturnedPlayer player Player data
+         */
         public void ListVaults(UnturnedPlayer player)
         {
             try
@@ -128,7 +131,7 @@ namespace NEXIS.Vaults
          * This function saves a player's inventory or individual item (depending on configuration settings)
          * to the server database that is configured
          * @param UnturnedPlayer player Player data
-         * @param int itemId Item ID to save to the database; if equals 0 save entire inventory
+         * @param ushort itemId Item ID to save to the database; if equals 0 save entire inventory
          */
         public void SavePlayerInventory(UnturnedPlayer player, ushort itemId = 0)
         {
@@ -293,7 +296,7 @@ namespace NEXIS.Vaults
          * This function loads a player's inventory or individual item (depending on configuration settings)
          * from the server database that is configured
          * @param UnturnedPlayer player Player data
-         * @param int itemId Item ID to load from database; if equals 0 load entire inventory
+         * @param ushort itemId Item ID to load from database; if equals 0 load entire inventory
          */
         public void OpenPlayerInventory(UnturnedPlayer player, int vault = 0)
         {
@@ -350,6 +353,57 @@ namespace NEXIS.Vaults
                 {
                     // no vault exists
                     UnturnedChat.Say(player, Vault.Instance.Translations.Instance.Translate("vault_empty"), Color.red);
+                }
+                MySQLConnection.Close();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(ex);
+            }
+        }
+
+        /**
+         * DELETE PLAYER VAULT
+         * 
+         * This function deletes a player vault from the server database
+         * @param UnturnedPlayer player Player data
+         * @param ushort itemId Item ID optionally passed to target a specific Vault
+         */
+        public void DeletePlayerVault(UnturnedPlayer player, ushort itemId = 0)
+        {
+            try
+            {
+                MySqlConnection MySQLConnection = CreateConnection();
+                MySqlCommand MySQLCommand = MySQLConnection.CreateCommand();
+                MySQLConnection.Open();
+
+                string itemId_delete = "";
+
+                // check if player vault already exists
+                if (itemId > 0)
+                {
+                    itemId_delete = " AND inventory = '" + itemId.ToString() + "'";
+                }
+
+                MySQLCommand.CommandText = "SELECT steam_id FROM " + Vault.Instance.Configuration.Instance.DatabaseTable + " WHERE steam_id = '" + player.CSteamID.ToString() + "' AND server_id = '" + Provider.serverID + "'" + itemId_delete;
+                object result = MySQLCommand.ExecuteScalar();
+
+                if (result != null)
+                {
+                    // delete vault from database
+                    MySQLCommand.CommandText = "DELETE FROM " + Vault.Instance.Configuration.Instance.DatabaseTable + " WHERE steam_id = '" + player.CSteamID.ToString() + "' AND server_id = '" + Provider.serverID + "'" + itemId_delete;
+                    MySQLCommand.ExecuteNonQuery();
+
+                    // DEBUG
+                    if (Vault.Instance.Configuration.Instance.Debug) { Logger.Log(player.CharacterName + " deleted Vault!", ConsoleColor.Yellow); }
+
+                    // vault deleted successfully 
+                    UnturnedChat.Say(player, Vault.Instance.Translations.Instance.Translate("vault_deleted"), Color.green);
+                }
+                else
+                {
+                    // no vault exists
+                    UnturnedChat.Say(player, Vault.Instance.Translations.Instance.Translate("vault_delete_empty"), Color.red);
                 }
                 MySQLConnection.Close();
             }

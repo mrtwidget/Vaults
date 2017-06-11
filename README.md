@@ -7,7 +7,7 @@ This plugin was developed using [Rocket Mod](https://rocketmod.net/) libraries f
 ![picture alt](http://nexisrealms.com/images/hosted/vaults.jpg "Simple Vaults v1.0 Logo")
 
 **Current Release :**
-- Simple Vaults v1.0.0.3
+- Simple Vaults v1.0.0.4
 
 **How to Install:**
 
